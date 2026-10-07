@@ -1,4 +1,4 @@
-package com.talento.crud.servicios;
+package com.talento.crud.controladores;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -8,21 +8,26 @@ import com.talento.crud.modelos.ProductoAlmacen;
 import com.talento.crud.modelos.ProductoIndumentaria;
 import com.talento.crud.utilidades.CapturarEntrada;
 
-public class ProductoServicios {
+// En la etapa actual del proyecto, en esta sección también se incluye lógica que corresponde a la capa de servicios.
+// Se incorporará la capa de servicios cuando se implemente persistencia de datos en DB.
+
+public class ProductoControlador {
 
     public static void mostrarProductos(ArrayList<ProductoModelo> productos) {
 
-        System.out.println("\n>> LISTADO DE PRODUCTOS:");
+        System.out.println("\n>> LISTADO DE PRODUCTOS:\n");
 
         if (productos.isEmpty()) {
-            System.out.println("\n\t[X] -- No existen productos ingresados.\n");
-        } else {
-            System.out.println();
-            for (ProductoModelo producto : productos) {
-                System.out.println(producto);
+            System.out.println("\t[X] -- No existen productos ingresados.\n");
+            return;
+        }
+
+        for (String cat : ProductoModelo.CATEGORIAS) {
+            for (ProductoModelo p : productos) {
+                if (p.getCategoria().equalsIgnoreCase(cat)) System.out.println(p);
             }
-            System.out.println("\t[!] -- Fin del listado. Total de productos: " + productos.size() +".\n");
-        }            
+        }
+        System.out.println("\t[!] -- Fin del listado. Total de productos: " + productos.size() +".\n");
     }
 
     public static void ingresarProducto(Scanner scanner, ArrayList<ProductoModelo> productos) {
@@ -35,29 +40,40 @@ public class ProductoServicios {
             System.out.println("\n\t[X] -- Error: ya existe un producto con ese código.\n");
             return;
         }
-
-        int categoria = CapturarEntrada.categoria(scanner);
-
+        
         System.out.println();
         String nombre = CapturarEntrada.textoNoVacio(scanner, "-> Ingrese el NOMBRE del producto: ").toUpperCase();
         System.out.println();
         double precio = CapturarEntrada.doubleNoNegativo(scanner, "-> Ingrese el PRECIO del producto: ");
         System.out.println();
 
-        ProductoModelo producto = null;
+        int indiceCategoria = -1;
 
-        switch (categoria) {
-            case 1:
-                String vencimientoFecha = CapturarEntrada.fecha(scanner, "-> Ingrese fecha de VENCIMIENTO del producto (dd/mm/aa): ");
+        do {
+            System.out.println(">> Seleccione CATEGORÍA del producto:");
+            for (int i = 0; i < ProductoModelo.CATEGORIAS.size(); i++) {
+                System.out.println("[" + (i + 1) + "] - " + ProductoModelo.CATEGORIAS.get(i) + ".");
+            }
+            System.out.print("-> Ingrese una opción: ");
+            indiceCategoria = CapturarEntrada.categoria(scanner, ProductoModelo.CATEGORIAS.size());
+        } while (indiceCategoria == -1);
+        System.out.println();
+
+        ProductoModelo producto = null;
+        String categoria = ProductoModelo.CATEGORIAS.get(indiceCategoria);
+
+        switch (indiceCategoria) {
+            case 0:
                 String presentacion = CapturarEntrada.textoNoVacio(scanner, "-> Ingrese la PRESENTACIÓN del producto: ");
-                producto = new ProductoAlmacen(codigo, nombre, precio, "Almacén", vencimientoFecha, presentacion);
+                System.out.println();
+                String vencimientoFecha = CapturarEntrada.fecha(scanner, "-> Ingrese fecha de VENCIMIENTO del producto (dd/mm/aa): ");
+                producto = new ProductoAlmacen(codigo, nombre, precio, categoria, vencimientoFecha, presentacion);
                 break;
-            case 2:
+            case 1:
                 String talle = CapturarEntrada.talle(scanner, "-> Ingrese el TALLE del producto: ");
+                System.out.println();
                 String descripcion = CapturarEntrada.textoNoVacio(scanner, "-> Ingrese breve DESCRIPCIÓN del producto: ");
-                producto = new ProductoIndumentaria(codigo, nombre, precio, "Indumentaria", talle, descripcion);
-                break;        
-            default:
+                producto = new ProductoIndumentaria(codigo, nombre, precio, categoria, talle, descripcion);
                 break;
         }        
 
@@ -72,10 +88,10 @@ public class ProductoServicios {
 
     public static void buscarProducto(Scanner scanner, ArrayList<ProductoModelo> productos) {
 
-        System.out.println("\n>> BUSCAR PRODUCTO:");
+        System.out.println("\n>> BUSCAR PRODUCTO:\n");
 
         if (productos.isEmpty()) {
-            System.out.println("\n\t[X] -- No existen productos ingresados.\n");
+            System.out.println("\t[X] -- No existen productos ingresados.\n");
             return;
         }
 
@@ -129,7 +145,7 @@ public class ProductoServicios {
         if (producto instanceof ProductoAlmacen) realizado = modificarProductoAlmacen(scanner, (ProductoAlmacen) producto, nuevoNombre, nuevoPrecio);
         if (producto instanceof ProductoIndumentaria) realizado = modificarProductoIndumentaria(scanner, (ProductoIndumentaria) producto, nuevoNombre, nuevoPrecio);        
         
-        System.out.println( realizado ? "\n\t[!] -- Producto modificado correctamente!\n" : "\n\t[X] -- El producto no se modificó.\n");   
+        System.out.println( realizado ? "\n\t[!] -- Producto modificado correctamente!\n" : "\n\t[X] -- El producto NO se modificó.\n");   
 
     }
 
@@ -152,7 +168,7 @@ public class ProductoServicios {
         }
         System.out.println("\n\t[!] -- Producto encontrado:\n");
         System.out.println(producto);
-        System.out.println("\n>> Se eliminará definitivamente.");
+        System.out.println(">> Se eliminará definitivamente.");
         
         if (CapturarEntrada.confirmar(scanner)){
             productos.remove(producto);
@@ -225,7 +241,7 @@ public class ProductoServicios {
         System.out.println("\t- Nombre: " + nuevoNombre + ".");
         System.out.println("\t- Precio: $" + nuevoPrecio + ".");
         System.out.println("\t- Presentación: " + nuevoPresentacion + ".");
-        System.out.println("\t- Fecha de vencimiento: " + nuevoVencimientoFecha + ".");
+        System.out.println("\t- Fecha de vencimiento: " + nuevoVencimientoFecha + ".\n");
         
         if (CapturarEntrada.confirmar(scanner)){
             almacen.setNombre(nuevoNombre);
@@ -254,7 +270,7 @@ public class ProductoServicios {
         System.out.println("\t- Nombre: " + nuevoNombre + ".");
         System.out.println("\t- Precio: $" + nuevoPrecio + ".");
         System.out.println("\t- Talle: " + nuevoTalle + ".");
-        System.out.println("\t- Descripción: " + nuevoDescripcion + ".");
+        System.out.println("\t- Descripción: " + nuevoDescripcion + ".\n");
         
         if (CapturarEntrada.confirmar(scanner)){
             indumentaria.setNombre(nuevoNombre);

@@ -1,6 +1,14 @@
 package com.talento.crud.modelos;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class ProductoModelo extends Object {
+
+    public static final ArrayList<String> CATEGORIAS = new ArrayList<>(
+        List.of("Almacén", "Indumentaria")
+    );
+    
     private int codigo;
     private String nombre;
     private double precio;

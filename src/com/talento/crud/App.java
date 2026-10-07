@@ -3,8 +3,8 @@ package com.talento.crud;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import com.talento.crud.controladores.ProductoControlador;
 import com.talento.crud.modelos.ProductoModelo;
-import com.talento.crud.servicios.ProductoServicios;
 import com.talento.crud.utilidades.CapturarEntrada;
 
 public class App {
@@ -29,22 +29,22 @@ public class App {
 
             switch (opcion) {
                 case 1:
-                    ProductoServicios.ingresarProducto(scanner, productos);
+                    ProductoControlador.ingresarProducto(scanner, productos);
                     break;
                 case 2:
-                    ProductoServicios.mostrarProductos(productos);
+                    ProductoControlador.mostrarProductos(productos);
                     break;
                 case 3:
-                    ProductoServicios.buscarProducto(scanner, productos);
+                    ProductoControlador.buscarProducto(scanner, productos);
                     break;
                 case 4:
-                    ProductoServicios.filtrarProductos(scanner, productos);
+                    ProductoControlador.filtrarProductos(scanner, productos);
                     break;
                 case 5:
-                    ProductoServicios.modificarProducto(scanner, productos);
+                    ProductoControlador.modificarProducto(scanner, productos);
                     break;
                 case 6:
-                    ProductoServicios.eliminarProducto(scanner, productos);
+                    ProductoControlador.eliminarProducto(scanner, productos);
                     break;
                 case 0:
                     System.out.println("\n\t[!] -- Finalizando...\n");
