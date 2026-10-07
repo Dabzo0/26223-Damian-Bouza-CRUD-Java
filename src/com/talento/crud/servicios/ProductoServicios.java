@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import com.talento.crud.modelos.ProductoModelo;
+import com.talento.crud.modelos.ProductoAlmacen;
+import com.talento.crud.modelos.ProductoIndumentaria;
 import com.talento.crud.utilidades.CapturarEntrada;
 
 public class ProductoServicios {
@@ -33,20 +35,39 @@ public class ProductoServicios {
             System.out.println("\n\t[X] -- Error: ya existe un producto con ese código.\n");
             return;
         }
+
+        int categoria = CapturarEntrada.categoria(scanner);
+
         System.out.println();
         String nombre = CapturarEntrada.textoNoVacio(scanner, "-> Ingrese el NOMBRE del producto: ").toUpperCase();
         System.out.println();
         double precio = CapturarEntrada.doubleNoNegativo(scanner, "-> Ingrese el PRECIO del producto: ");
         System.out.println();
-        int stock = CapturarEntrada.enteroNoNegativo(scanner, "-> Ingrese el STOCK del producto: ");
 
-        ProductoModelo producto = new ProductoModelo(codigo, nombre, precio, stock);
+        ProductoModelo producto = null;
 
-        productos.add(producto);
+        switch (categoria) {
+            case 1:
+                String vencimientoFecha = CapturarEntrada.fecha(scanner, "-> Ingrese fecha de VENCIMIENTO del producto (dd/mm/aa): ");
+                String presentacion = CapturarEntrada.textoNoVacio(scanner, "-> Ingrese la PRESENTACIÓN del producto: ");
+                producto = new ProductoAlmacen(codigo, nombre, precio, "Almacén", vencimientoFecha, presentacion);
+                break;
+            case 2:
+                String talle = CapturarEntrada.talle(scanner, "-> Ingrese el TALLE del producto: ");
+                String descripcion = CapturarEntrada.textoNoVacio(scanner, "-> Ingrese breve DESCRIPCIÓN del producto: ");
+                producto = new ProductoIndumentaria(codigo, nombre, precio, "Indumentaria", talle, descripcion);
+                break;        
+            default:
+                break;
+        }        
 
-        System.out.println("\n" + producto);
-
-        System.out.println("\t[!] -- Producto ingresado correctamente.\n");
+        if (producto != null){
+            productos.add(producto);
+            System.out.println("\n" + producto);
+            System.out.println("\t[!] -- Producto ingresado correctamente.\n");
+        } else {            
+            System.out.println("\n\t[X] -- El producto NO se ingresó.\n");            
+        }
     }
 
     public static void buscarProducto(Scanner scanner, ArrayList<ProductoModelo> productos) {
@@ -92,7 +113,6 @@ public class ProductoServicios {
         System.out.println(producto);
         String nuevoNombre = producto.getNombre();
         double nuevoPrecio = producto.getPrecio();
-        int nuevoStock=producto.getStock();
         
         System.out.println(">> Modificar NOMBRE del producto?");
         if (CapturarEntrada.confirmar(scanner)){
@@ -104,26 +124,12 @@ public class ProductoServicios {
             nuevoPrecio = CapturarEntrada.doubleNoNegativo(scanner, "-> Ingrese el nuevo precio del producto: ");
         }
         
-        System.out.println("\n>> Modificar el STOCK del producto?");
-        if (CapturarEntrada.confirmar(scanner)){
-            nuevoStock = CapturarEntrada.enteroNoNegativo(scanner, "-> Ingrese el nuevo stock del producto:");
-        }
+        boolean realizado = false;
 
-        System.out.println("\n"+producto);
-        System.out.println(">> Cambiará a:\n");
-        System.out.println("** Producto\t\t\tcódigo [ " + producto.getCodigo() +" ]");
-        System.out.println("\t- Nombre: " + nuevoNombre + ".");
-        System.out.println("\t- Precio: $" + nuevoPrecio + ".");
-        System.out.println("\t- Stock: " + nuevoStock + ".\n");
+        if (producto instanceof ProductoAlmacen) realizado = modificarProductoAlmacen(scanner, (ProductoAlmacen) producto, nuevoNombre, nuevoPrecio);
+        if (producto instanceof ProductoIndumentaria) realizado = modificarProductoIndumentaria(scanner, (ProductoIndumentaria) producto, nuevoNombre, nuevoPrecio);        
         
-        if (CapturarEntrada.confirmar(scanner)){
-            producto.setNombre(nuevoNombre);
-            producto.setPrecio(nuevoPrecio);
-            producto.setStock(nuevoStock);
-            System.out.println("\n\t[!] -- Producto modificado correctamente!\n");
-        }else{
-            System.out.println("\n\t[X] -- El producto no se modificó.\n");
-        }
+        System.out.println( realizado ? "\n\t[!] -- Producto modificado correctamente!\n" : "\n\t[X] -- El producto no se modificó.\n");   
 
     }
 
@@ -201,6 +207,64 @@ public class ProductoServicios {
         }
 
         return null;
+    }
+
+    public static boolean modificarProductoAlmacen(Scanner scanner, ProductoAlmacen almacen, String nuevoNombre, double nuevoPrecio){
+        String nuevoVencimientoFecha= almacen.getVencimientoFecha();
+        String nuevoPresentacion= almacen.getPresentacion();
+
+        System.out.println("\n>> Modificar PRESENTACIÓN del producto?");
+        if (CapturarEntrada.confirmar(scanner)) nuevoPresentacion = CapturarEntrada.textoNoVacio(scanner, "-> Ingrese la nueva presentación del producto:");
+
+        System.out.println("\n>> Modificar fecha de VENCIMIENTO del producto?");
+        if (CapturarEntrada.confirmar(scanner)) nuevoVencimientoFecha = CapturarEntrada.fecha(scanner, "-> Ingrese la nueva fecha de vencimiento del producto dd/mm/aa:");
+        
+        System.out.println("\n"+ almacen );
+        System.out.println(">> Cambiará a:\n");
+        System.out.println("** "+almacen.getCategoria()+"\t\t\tcódigo [ " + almacen.getCodigo() +" ]");
+        System.out.println("\t- Nombre: " + nuevoNombre + ".");
+        System.out.println("\t- Precio: $" + nuevoPrecio + ".");
+        System.out.println("\t- Presentación: " + nuevoPresentacion + ".");
+        System.out.println("\t- Fecha de vencimiento: " + nuevoVencimientoFecha + ".");
+        
+        if (CapturarEntrada.confirmar(scanner)){
+            almacen.setNombre(nuevoNombre);
+            almacen.setPrecio(nuevoPrecio);
+            almacen.setVencimientoFecha(nuevoVencimientoFecha);
+            almacen.setPresentacion(nuevoPresentacion);
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public static boolean modificarProductoIndumentaria(Scanner scanner, ProductoIndumentaria indumentaria, String nuevoNombre, double nuevoPrecio){
+        String nuevoTalle = indumentaria.getTalle();
+        String nuevoDescripcion = indumentaria.getDescripcion();
+
+        System.out.println("\n>> Modificar TALLE del producto?");
+        if (CapturarEntrada.confirmar(scanner)) nuevoTalle = CapturarEntrada.talle(scanner, "-> Ingrese el nuevo TALLE del producto: ");
+
+        System.out.println("\n>> Modificar DESCRIPCIÓN del producto?");
+        if (CapturarEntrada.confirmar(scanner)) nuevoDescripcion = CapturarEntrada.textoNoVacio(scanner, "-> Ingrese la nueva breve DESCRIPCIÓN del producto: ");
+        
+        System.out.println("\n"+ indumentaria );
+        System.out.println(">> Cambiará a:\n");
+        System.out.println("** " + indumentaria.getCategoria() + "\t\t\tcódigo [ " + indumentaria.getCodigo() +" ]");
+        System.out.println("\t- Nombre: " + nuevoNombre + ".");
+        System.out.println("\t- Precio: $" + nuevoPrecio + ".");
+        System.out.println("\t- Talle: " + nuevoTalle + ".");
+        System.out.println("\t- Descripción: " + nuevoDescripcion + ".");
+        
+        if (CapturarEntrada.confirmar(scanner)){
+            indumentaria.setNombre(nuevoNombre);
+            indumentaria.setPrecio(nuevoPrecio);
+            indumentaria.setTalle(nuevoTalle);
+            indumentaria.setDescripcion(nuevoDescripcion);
+            return true;
+        }else{
+            return false;
+        }
     }
 
 }

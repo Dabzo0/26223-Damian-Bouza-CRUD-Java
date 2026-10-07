@@ -1,18 +1,18 @@
 package com.talento.crud.modelos;
 
-public class ProductoModelo {
+public abstract class ProductoModelo extends Object {
     private int codigo;
     private String nombre;
     private double precio;
-    private int stock;
+    private String categoria;
 
     public ProductoModelo (){}
 
-    public ProductoModelo(int codigo, String nombre, double precio, int stcok) {
+    public ProductoModelo(int codigo, String nombre, double precio, String categoria) {
         this.codigo = codigo;
         this.nombre = nombre;
         this.precio = precio;
-        this.stock = stcok;
+        this.categoria = categoria;
     }
 
     public int getCodigo() {
@@ -39,19 +39,23 @@ public class ProductoModelo {
         this.precio = precio;
     }
 
-    public int getStock() {
-        return stock;
+    public String getCategoria() {
+        return categoria;
     }
 
-    public void setStock(int stock) {
-        this.stock = stock;
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
     }
+
+    public abstract String getTipoProducto();
+
+    public abstract String getDetalleEspecifico();
 
     @Override
     public String toString() {
-        return "** Producto\t\t\tcódigo [ " + codigo +" ]\n"+
+        return "** " + categoria + "\t\t\tcódigo [ " + codigo +" ]\n"+
             "\t- Nombre: " + nombre + ".\n" +
             "\t- Precio: $" + precio + ".\n" +
-            "\t- Stock: " + stock + ".\n";
+            getDetalleEspecifico();
     }
 }

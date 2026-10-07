@@ -51,6 +51,7 @@ public class App {
                     break;
                 default:
                     //System.out.println("\t[ "+ opcion + " ] No es una opción válida.");
+                    break;
             }
             if (opcion!=0){
                 System.out.print("[ENTER] -- Para volver al menú principal...");
